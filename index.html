@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Beatriz — Trilha</title>
+<style>
+  :root {
+    --orange: #ee4c20;
+    --sand: #e9e8e4;
+    --dark: #1a1a1a;
+    --green: #16a34a;
+    --yellow: #ca8a04;
+    --red: #dc2626;
+    --bg-green: #f0fdf4;
+    --bg-yellow: #fefce8;
+    --bg-red: #fef2f2;
+    --border-green: #bbf7d0;
+    --border-yellow: #fde68a;
+    --border-red: #fecaca;
+    --text-muted: #6b7280;
+    --text-sm: 0.78rem;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--sand);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+  /* ── Header ── */
+  .header {
+    background: var(--dark);
+    color: white;
+    padding: 20px 28px 16px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-logo {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--orange);
+    text-transform: uppercase;
+  }
+  .header-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: white;
+  }
+  .header-updated {
+    font-size: var(--text-sm);
+    color: #9ca3af;
+    margin-left: auto;
+  }
+  /* ── Summary bar ── */
+  .summary-bar {
+    background: #111;
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #333;
+  }
+  .summary-item {
+    flex: 1;
+    padding: 14px 20px;
+    text-align: center;
+    border-right: 1px solid #333;
+  }
+  .summary-item:last-child { border-right: none; }
+  .summary-count {
+    font-size: 1.7rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .summary-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-top: 4px;
+    color: #9ca3af;
+  }
+  .summary-item.s-red .summary-count { color: #f87171; }
+  .summary-item.s-yellow .summary-count { color: #fbbf24; }
+  .summary-item.s-green .summary-count { color: #4ade80; }
+  .summary-item.s-total .summary-count { color: white; }
+  /* ── Filters ── */
+  .filters {
+    padding: 14px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .filters label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    align-self: center;
+    margin-right: 4px;
+  }
+  .filter-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1.5px solid #d1d5db;
+    background: white;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--dark);
+  }
+  .filter-btn:hover { border-color: var(--orange); color: var(--orange); }
+  .filter-btn.active { background: var(--dark); border-color: var(--dark); color: white; }
+  .filter-btn.f-red.active { background: var(--red); border-color: var(--red); }
+  .filter-btn.f-yellow.active { background: var(--yellow); border-color: var(--yellow); }
+  .filter-btn.f-green.active { background: var(--green); border-color: var(--green); }
+  .filter-sep { width: 1px; background: #e5e7eb; margin: 0 4px; }
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+    padding: 20px;
+  }
+  /* ── Card ── */
+  .card {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    border: 1.5px solid #e5e7eb;
+    transition: box-shadow .15s;
+  }
+  .card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.1); }
+  .card-red { border-color: var(--border-red); background: var(--bg-red); }
+  .card-yellow { border-color: var(--border-yellow); background: var(--bg-yellow); }
+  .card-green { border-color: var(--border-green); }
+  .card-header {
+    padding: 12px 14px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+  }
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .client-name {
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+  .card-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+  }
+  .badge-nicho {
+    font-size: .62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+  .nicho-imobiliario { background: #ede9fe; color: #6d28d9; }
+  .nicho-hotelaria   { background: #fce7f3; color: #9d174d; }
+  .nicho-auto        { background: #dbeafe; color: #1d4ed8; }
+  .badge-assessor {
+    font-size: .62rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .card-body {
+    padding: 10px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .section-label {
+    font-size: .62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    font-size: var(--text-sm);
+    align-items: baseline;
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(0,0,0,.04);
+  }
+  .meta-name {
+    font-weight: 600;
+    color: var(--dark);
+    font-size: .7rem;
+  }
+  .meta-stat { color: var(--dark); }
+  .meta-bal { color: var(--text-muted); }
+  .meta-sp  { color: var(--text-muted); }
+  .meta-warn { color: var(--red); font-size: .75rem; }
+  .spend-total {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-align: right;
+    margin-top: 2px;
+  }
+  .report-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--text-sm);
+  }
+  .report-date { color: var(--text-muted); font-size: .7rem; }
+  .client-note { font-size: .68rem; color: var(--text-muted); font-style: italic; }
+  .alert {
+    font-size: .75rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 5px;
+    margin-bottom: 2px;
+  }
+  .alert-red    { background: #fee2e2; color: #991b1b; }
+  .alert-yellow { background: #fef3c7; color: #92400e; }
+  /* Badges */
+  .badge {
+    display: inline-block;
+    font-size: .66rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+  .badge-green  { background: #dcfce7; color: #166534; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+  .badge-gray   { background: #f3f4f6; color: #6b7280; }
+  .hidden { display: none !important; }
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 28px;
+    font-size: .72rem;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <span class="header-logo">Trilha</span>
+  <span class="header-title">Painel Beatriz</span>
+  <span class="header-updated">Atualizado 24/06/2026 às 19:53 BRT</span>
+</header>
+
+<div class="summary-bar">
+  <div class="summary-item s-total">
+    <div class="summary-count">23</div>
+    <div class="summary-label">Clientes</div>
+  </div>
+  <div class="summary-item s-red">
+    <div class="summary-count">4</div>
+    <div class="summary-label">Crítico</div>
+  </div>
+  <div class="summary-item s-yellow">
+    <div class="summary-count">7</div>
+    <div class="summary-label">Atenção</div>
+  </div>
+  <div class="summary-item s-green">
+    <div class="summary-count">12</div>
+    <div class="summary-label">Saudável</div>
+  </div>
+</div>
+
+<div class="filters">
+  <label>Status</label>
+  <button class="filter-btn active" data-filter="all">Todos</button>
+  <button class="filter-btn f-red" data-filter="health:red">Crítico</button>
+  <button class="filter-btn f-yellow" data-filter="health:yellow">Atenção</button>
+  <button class="filter-btn f-green" data-filter="health:green">Saudável</button>
+  <div class="filter-sep"></div>
+  <label>Nicho</label>
+  <button class="filter-btn" data-filter="nicho:imobiliario">Imobiliário</button>
+  <button class="filter-btn" data-filter="nicho:hotelaria">Hotelaria</button>
+  <button class="filter-btn" data-filter="nicho:auto">Auto</button>
+  <div class="filter-sep"></div>
+  <label>Assessor</label>
+  <button class="filter-btn" data-filter="assessor:enrique">Enrique</button>
+  <button class="filter-btn" data-filter="assessor:bruno">Bruno</button>
+</div>
+
+<div class="grid" id="grid">
+
+    <div class="card card-red" data-nicho="auto" data-health="red" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-red" style="background:#dc2626"></span>
+          <span class="client-name">Taiyo Honda</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-auto">Auto</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-red">⚠ Saldo Taiyo - Novos para 4d</div><div class="alert alert-red">⚠ Relatório automático falhou</div>
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Taiyo - Novos</span>
+              <span class="meta-stat">🟢 5 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 1.800</span>
+              <span class="meta-sp">R$ 2.966/sem</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-name">Taiyo - Pós-vendas</span>
+              <span class="meta-stat">🟢 3 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 1.567</span>
+              <span class="meta-sp">R$ 261/sem</span>
+            </div>
+        <div class="spend-total">Total 7d: R$ 3.228</div>
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-red">FALHOU</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-red" data-nicho="imobiliario" data-health="red" data-assessor="bruno">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-red" style="background:#dc2626"></span>
+          <span class="client-name">CROS Empreendimentos</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Bruno</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-red">⚠ Conta Reserva do Peba zerada</div>
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Reserva do Peba</span>
+              <span class="meta-stat">🟢 2 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 0</span>
+              <span class="meta-sp">R$ 0/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-red" data-nicho="imobiliario" data-health="red" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-red" style="background:#dc2626"></span>
+          <span class="client-name">Fellipe Carneiro</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-red">⚠ Relatório automático falhou</div>
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">BM3 - FORTENA IMOB</span>
+              <span class="meta-stat">🟢 1 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 1.010</span>
+              <span class="meta-sp">R$ 419/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-red">FALHOU</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-red" data-nicho="imobiliario" data-health="red" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-red" style="background:#dc2626"></span>
+          <span class="client-name">HL Prime</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-red">⚠ Conta HL Prime  zerada</div>
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">HL Prime </span>
+              <span class="meta-stat">🟢 6 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 0</span>
+              <span class="meta-sp">R$ 0/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-gray">Manual</span>
+          
+        </div>
+        <div class="client-note">Relatório manual</div>
+      </div>
+    </div>
+    <div class="card card-yellow" data-nicho="auto" data-health="yellow" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-yellow" style="background:#ca8a04"></span>
+          <span class="client-name">Mix Mobi</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-auto">Auto</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-yellow">⚡ Saldo Grupo MGS [Moto Chefe/ Mixmobi] para ~6d</div>
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Grupo MGS [Moto Chefe/ Mixmobi]</span>
+              <span class="meta-stat">🟢 4 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 1.009</span>
+              <span class="meta-sp">R$ 1.054/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-gray">Manual</span>
+          
+        </div>
+        <div class="client-note">Conta Meta compartilhada com MotoChefe</div>
+      </div>
+    </div>
+    <div class="card card-yellow" data-nicho="auto" data-health="yellow" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-yellow" style="background:#ca8a04"></span>
+          <span class="client-name">MotoChefe</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-auto">Auto</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-yellow">⚡ Saldo Grupo MGS [Moto Chefe/ Mixmobi] para ~6d</div>
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Grupo MGS [Moto Chefe/ Mixmobi]</span>
+              <span class="meta-stat">🟢 4 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 1.009</span>
+              <span class="meta-sp">R$ 1.054/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-yellow" data-nicho="imobiliario" data-health="yellow" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-yellow" style="background:#ca8a04"></span>
+          <span class="client-name">Henrique</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-yellow">⚡ Conta Meta não encontrada na API</div>
+        <div class="section-label">META ADS</div>
+        <div class="meta-row meta-warn">conta não encontrada</div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-yellow" data-nicho="imobiliario" data-health="yellow" data-assessor="bruno">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-yellow" style="background:#ca8a04"></span>
+          <span class="client-name">Inove Engenharia</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Bruno</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-yellow">⚡ Saldo Mansões - Inove Engenharia para ~5d</div>
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Mansões - Inove Engenharia</span>
+              <span class="meta-stat">🟢 1 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 200</span>
+              <span class="meta-sp">R$ 242/sem</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-name">UANÁ - Inove Engenharia</span>
+              <span class="meta-stat">🟢 1 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 667</span>
+              <span class="meta-sp">R$ 306/sem</span>
+            </div>
+        <div class="spend-total">Total 7d: R$ 548</div>
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-yellow" data-nicho="imobiliario" data-health="yellow" data-assessor="bruno">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-yellow" style="background:#ca8a04"></span>
+          <span class="client-name">Maia Imóveis</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Bruno</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-yellow">⚡ Saldo Maia Imóveis [Boleto] para ~9d</div>
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Maia Imóveis [Boleto]</span>
+              <span class="meta-stat">🟢 8 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 3.172</span>
+              <span class="meta-sp">R$ 2.305/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 0d</span>
+          <span class="report-date">2026-06-24</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-yellow" data-nicho="imobiliario" data-health="yellow" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-yellow" style="background:#ca8a04"></span>
+          <span class="client-name">Queiroz Azevedo</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-yellow">⚡ Saldo Queiroz Azevedo para ~7d</div>
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Queiroz Azevedo</span>
+              <span class="meta-stat">🟢 2 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 525</span>
+              <span class="meta-sp">R$ 521/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-yellow" data-nicho="imobiliario" data-health="yellow" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-yellow" style="background:#ca8a04"></span>
+          <span class="client-name">Ypê</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-yellow">⚡ Conta Meta não encontrada na API</div>
+        <div class="section-label">META ADS</div>
+        <div class="meta-row meta-warn">conta não encontrada</div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="hotelaria" data-health="green" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">Hotel Ponta Verde</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-hotelaria">Hotelaria</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Hotéis Ponta Verde | Maceió</span>
+              <span class="meta-stat">🟢 6 camp. ativas</span>
+              
+              <span class="meta-sp">R$ 2.990/sem</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-name">Hotéis Ponta Verde | Francês</span>
+              <span class="meta-stat">🟢 6 camp. ativas</span>
+              
+              <span class="meta-sp">R$ 2.020/sem</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-name">Hotéis Ponta Verde | Fateixa</span>
+              <span class="meta-stat">🟢 1 camp. ativas</span>
+              
+              <span class="meta-sp">R$ 262/sem</span>
+            </div>
+        <div class="spend-total">Total 7d: R$ 5.272</div>
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="hotelaria" data-health="green" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">MME Vacation Club</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-hotelaria">Hotelaria</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Ipioca Mar Resort</span>
+              <span class="meta-stat">🟢 3 camp. ativas</span>
+              
+              <span class="meta-sp">R$ 2.093/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 0d</span>
+          <span class="report-date">2026-06-24</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="hotelaria" data-health="green" data-assessor="bruno">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">Porto Kaetê</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-hotelaria">Hotelaria</span>
+          <span class="badge-assessor">Bruno</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Porto Kaeté</span>
+              <span class="meta-stat">🟢 3 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 5.745</span>
+              <span class="meta-sp">R$ 810/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-gray">Manual</span>
+          
+        </div>
+        <div class="client-note">Relatório manual</div>
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">Adelmo Buffone</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Adelmo Buffone</span>
+              <span class="meta-stat">🟢 1 camp. ativas</span>
+              
+              <span class="meta-sp">R$ 51/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">Andaza Imóveis</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">ANDAZA</span>
+              <span class="meta-stat">🟢 1 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 4.976</span>
+              <span class="meta-sp">R$ 325/sem</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-name">Marca + Andaza</span>
+              <span class="meta-stat">🟢 1 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 2.343</span>
+              <span class="meta-sp">R$ 485/sem</span>
+            </div>
+        <div class="spend-total">Total 7d: R$ 810</div>
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">HL Imóveis</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">HL IMOVEIS -  LANCAMENTOS</span>
+              <span class="meta-stat">🟢 3 camp. ativas</span>
+              
+              <span class="meta-sp">R$ 918/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-gray">Manual</span>
+          
+        </div>
+        <div class="client-note">Relatório manual</div>
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="bruno">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">Lion Imob</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Bruno</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">CA2 - Lion Negócios Imobiliários</span>
+              <span class="meta-stat">🟢 6 camp. ativas</span>
+              
+              <span class="meta-sp">R$ 1.420/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">Lucas Ferreira</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Lucas Ferreira</span>
+              <span class="meta-stat">🟢 117 camp. ativas</span>
+              
+              <span class="meta-sp">R$ 3.765/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-gray">Manual</span>
+          
+        </div>
+        <div class="client-note">Relatório manual</div>
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="bruno">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">NI Terceiros</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Bruno</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">NI Negócios de Terceiros</span>
+              <span class="meta-stat">🟢 3 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 2.178</span>
+              <span class="meta-sp">R$ 809/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">Rafaella Mauricio</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Rafaella Mauricio</span>
+              <span class="meta-stat">🟢 2 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 2.421</span>
+              <span class="meta-sp">R$ 489/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">Renato Vidal</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Enrique</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Renato Vidal</span>
+              <span class="meta-stat">🟢 4 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 3.204</span>
+              <span class="meta-sp">R$ 608/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="bruno">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="dot dot-green" style="background:#16a34a"></span>
+          <span class="client-name">Thiago Lessa</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
+          <span class="badge-assessor">Bruno</span>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="section-label">META ADS</div>
+        
+            <div class="meta-row">
+              <span class="meta-name">Thiago Lessa</span>
+              <span class="meta-stat">🟢 3 camp. ativas</span>
+              <span class="meta-bal">Saldo R$ 1.855</span>
+              <span class="meta-sp">R$ 599/sem</span>
+            </div>
+        
+        <div class="section-label">RELATÓRIO</div>
+        <div class="report-row">
+          <span class="badge badge-green">✓ há 2d</span>
+          <span class="report-date">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+</div>
+
+<footer class="footer">
+  Trilha Performance Digital · Carteira Beatriz · 24/06/2026 às 19:53 BRT
+</footer>
+
+<script>
+  const btns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.card');
+
+  function applyFilters() {
+    const active = [...btns].filter(b => b.classList.contains('active')).map(b => b.dataset.filter);
+    if (active.includes('all')) {
+      cards.forEach(c => c.classList.remove('hidden'));
+      return;
+    }
+    cards.forEach(card => {
+      const nicho    = card.dataset.nicho;
+      const health   = card.dataset.health;
+      const assessor = card.dataset.assessor;
+      const show = active.every(f => {
+        if (f.startsWith('health:'))   return health   === f.split(':')[1];
+        if (f.startsWith('nicho:'))    return nicho    === f.split(':')[1];
+        if (f.startsWith('assessor:')) return assessor === f.split(':')[1];
+        return true;
+      });
+      card.classList.toggle('hidden', !show);
+    });
+  }
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const f = btn.dataset.filter;
+      if (f === 'all') {
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      } else {
+        const allBtn = document.querySelector('[data-filter="all"]');
+        allBtn.classList.remove('active');
+        btn.classList.toggle('active');
+        if (![...btns].some(b => b.classList.contains('active'))) {
+          allBtn.classList.add('active');
+        }
+      }
+      applyFilters();
+    });
+  });
+</script>
+</body>
+</html>

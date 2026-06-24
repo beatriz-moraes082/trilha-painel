@@ -20,15 +20,16 @@ from pathlib import Path
 # ─── ENV ─────────────────────────────────────────────────────────────────────
 
 def load_env():
+    env = dict(os.environ)
     env_path = Path(__file__).parent.parent / ".env"
     if env_path.exists():
-        env = {}
         for line in env_path.read_text().splitlines():
             if "=" in line and not line.startswith("#"):
                 k, v = line.split("=", 1)
-                env[k.strip()] = v.strip()
-        return env
-    return dict(os.environ)
+                k, v = k.strip(), v.strip()
+                if k not in env:
+                    env[k] = v
+    return env
 
 ENV = load_env()
 
