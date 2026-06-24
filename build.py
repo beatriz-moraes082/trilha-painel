@@ -512,338 +512,346 @@ def build_client_data(client, acc_by_id, acc_by_name_norm, meta_token, gh_token)
 
 # ─── HTML ────────────────────────────────────────────────────────────────────
 
-def nicho_badge_style(nicho):
-    styles = {
-        "Imobiliário": "background:#ede9fe;color:#5b21b6;",
-        "Hotelaria": "background:#fce7f3;color:#9d174d;",
-        "Auto": "background:#dbeafe;color:#1e40af;",
-    }
-    return styles.get(nicho, "background:#f3f4f6;color:#374151;")
+NICHO_CSS = {
+    "Imobiliário": ("background:#ede9fe;color:#5b21b6;", "imobiliario"),
+    "Hotelaria":   ("background:#fce7f3;color:#9d174d;", "hotelaria"),
+    "Auto":        ("background:#dbeafe;color:#1e40af;", "auto"),
+}
+
+def _chip(text, bg, color, size="11px"):
+    return (f'<span style="display:inline-block;font-size:{size};font-weight:700;'
+            f'letter-spacing:.03em;padding:2px 9px;border-radius:20px;'
+            f'background:{bg};color:{color};white-space:nowrap;">{text}</span>')
 
 def report_badge_html(cd):
     conc = cd["report_conclusion"]
     days = cd["report_days_ago"]
     repo = cd["client"].get("report_repo")
     note = cd["client"].get("note")
-
     if note and not repo:
-        return '<span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3f4f6;color:#6b7280;">Manual</span>'
+        return _chip("Manual", "#f3f4f6", "#6b7280")
     if not repo:
-        return '<span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3f4f6;color:#6b7280;">—</span>'
-    if conc == "no_token":
-        return '<span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3f4f6;color:#6b7280;">sem token</span>'
-    if conc is None:
-        return '<span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3f4f6;color:#6b7280;">sem runs</span>'
+        return _chip("—", "#f3f4f6", "#6b7280")
+    if conc in (None, "no_token"):
+        return _chip("sem dados", "#f3f4f6", "#6b7280")
     if conc == "failure":
-        return '<span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#fee2e2;color:#991b1b;">FALHOU</span>'
+        return _chip("FALHOU", "#fee2e2", "#991b1b")
     if conc == "success":
-        label = f"há {days}d" if days is not None else "ok"
-        color = ("background:#dcfce7;color:#166534;" if (days or 0) <= 7
-                 else "background:#fef9c3;color:#854d0e;")
-        return f'<span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;{color}">✓ {label}</span>'
-    return f'<span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3f4f6;color:#6b7280;">{conc}</span>'
+        label = f"✓ há {days}d" if days is not None else "✓ ok"
+        bg, col = ("#dcfce7", "#166534") if (days or 0) <= 7 else ("#fef9c3", "#854d0e")
+        return _chip(label, bg, col)
+    return _chip(conc, "#f3f4f6", "#6b7280")
 
-def meta_status_pill(acc):
+def meta_line(acc):
+    """Uma linha limpa por conta Meta."""
     if not acc["is_active"]:
-        return '<span style="color:#dc2626;font-weight:700;font-size:.78rem;">● Desativada</span>'
-    camps = acc.get("active_campaigns")
-    camp_str = f" · {camps} camp." if camps is not None else ""
-    return f'<span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa{camp_str}</span>'
+        dot = '<span style="color:#dc2626;font-size:10px;">●</span>'
+        status = f'<span style="color:#dc2626;font-weight:600;">{acc["status_label"]}</span>'
+    else:
+        dot = '<span style="color:#16a34a;font-size:10px;">●</span>'
+        camps = acc.get("active_campaigns")
+        camp_str = f" · {camps} camp." if camps is not None else ""
+        status = f'<span style="color:#16a34a;font-weight:600;">Ativa{camp_str}</span>'
 
-def build_action_rows(items, level):
-    if not items:
-        return ""
-    bg = "#fee2e2" if level == "red" else "#fef9c3"
-    border = "#fca5a5" if level == "red" else "#fde047"
-    icon = "⚠" if level == "red" else "⚡"
-    rows = ""
-    for item in items:
-        owner_style = ("background:#dc2626;color:white;" if level == "red"
-                       else "background:#ca8a04;color:white;")
-        rows += f"""
-        <div style="border-left:3px solid {border};background:{bg};border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">{icon} {item['title']}</span>
-            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;{owner_style}">{item['owner']}</span>
-          </div>
-          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">{item['action']}</div>
-        </div>"""
-    return rows
+    bal_str = f' · <span style="color:#374151;">R$ {fmt_br(acc["balance"])}</span>' if acc.get("balance") is not None else ""
+    burn_str = (f' · <span style="color:#6b7280;">R$ {fmt_br(acc["burn_daily"])}/dia</span>'
+                if acc.get("burn_daily") else "")
+    days_str = ""
+    if acc.get("days_left") is not None:
+        dc = "#dc2626" if acc["days_left"] < 5 else ("#ca8a04" if acc["days_left"] < 10 else "#6b7280")
+        days_str = f' · <span style="color:{dc};font-weight:600;">{acc["days_left"]}d</span>'
+
+    name_short = acc["name"]
+    return (f'<div style="display:flex;align-items:center;gap:6px;padding:5px 0;'
+            f'border-bottom:1px solid #f3f4f6;font-size:13px;">'
+            f'{dot} {status}{bal_str}{burn_str}{days_str}'
+            f'<span style="color:#9ca3af;font-size:11px;margin-left:auto;text-align:right;max-width:140px;'
+            f'overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">{name_short}</span>'
+            f'</div>')
 
 def build_html(results, now_str):
-    # Coleta todas as ações P1 e P2 de todos os clientes pra briefing
-    p1_actions = []
-    p2_actions = []
-    for cd in results:
-        cl = cd["client"]
-        for a in cd["alerts"]:
-            p1_actions.append({**a, "client_name": cl["name"], "nicho": cl["nicho"]})
-        for w in cd["warnings"]:
-            p2_actions.append({**w, "client_name": cl["name"], "nicho": cl["nicho"]})
-
-    n_red = sum(1 for r in results if r["health"] == "red")
+    n_red    = sum(1 for r in results if r["health"] == "red")
     n_yellow = sum(1 for r in results if r["health"] == "yellow")
-    n_green = sum(1 for r in results if r["health"] == "green")
-    n_total = len(results)
+    n_green  = sum(1 for r in results if r["health"] == "green")
+    n_total  = len(results)
 
-    # ── Briefing de ações ────────────────────────────────────────────────────
-    briefing_html = ""
+    # ── Briefing ──────────────────────────────────────────────────────────────
+    p1_items, p2_items = [], []
+    for cd in results:
+        name = cd["client"]["name"]
+        for a in cd["alerts"]:
+            p1_items.append({**a, "client_name": name})
+        for w in cd["warnings"]:
+            p2_items.append({**w, "client_name": name})
 
-    if p1_actions:
+    def briefing_rows(items, level):
+        bc = "#fef2f2" if level == "red" else "#fefce8"
+        lc = "#dc2626" if level == "red" else "#ca8a04"
+        oc = "#dc2626" if level == "red" else "#ca8a04"
+        icon = "⚠" if level == "red" else "⚡"
         rows = ""
-        for a in p1_actions:
+        for it in items:
             rows += f"""
-          <div style="border-left:3px solid #f87171;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
-              <div>
-                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#f87171;">P1 · {a['client_name']}</span>
-                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">{a['title']}</div>
-              </div>
-              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#dc2626;color:white;">{a['owner']}</span>
-            </div>
-            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">{a['action']}</div>
-          </div>"""
-        briefing_html += f"""
-      <div style="margin-bottom:16px;">
-        <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#f87171;margin-bottom:8px;">
-          ⚠ Ações P1 — resolver hoje ({len(p1_actions)})
+      <div style="display:grid;grid-template-columns:160px 1fr auto;gap:0;border-bottom:1px solid #f3f4f6;align-items:start;">
+        <div style="padding:12px 16px 12px 0;border-right:1px solid #f3f4f6;">
+          <div style="font-size:13px;font-weight:700;color:#1a1a1a;">{it['client_name']}</div>
         </div>
-        {rows}
-      </div>"""
-
-    if p2_actions:
-        rows = ""
-        for a in p2_actions:
-            rows += f"""
-          <div style="border-left:3px solid #fbbf24;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
-              <div>
-                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fbbf24;">P2 · {a['client_name']}</span>
-                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">{a['title']}</div>
-              </div>
-              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">{a['owner']}</span>
-            </div>
-            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">{a['action']}</div>
-          </div>"""
-        briefing_html += f"""
-      <div>
-        <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#fbbf24;margin-bottom:8px;">
-          ⚡ Ações P2 — esta semana ({len(p2_actions)})
+        <div style="padding:12px 16px;">
+          <div style="font-size:13px;font-weight:600;color:#1a1a1a;">{icon} {it['title']}</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:3px;line-height:1.5;">{it['action']}</div>
         </div>
-        {rows}
+        <div style="padding:12px 0 12px 8px;">
+          <span style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:{oc};color:white;white-space:nowrap;">{it['owner']}</span>
+        </div>
       </div>"""
+        return rows
 
-    if not p1_actions and not p2_actions:
-        briefing_html = """
-      <div style="text-align:center;padding:20px;color:#4ade80;">
-        <span style="font-size:1.5rem;">✓</span>
-        <div style="font-size:.85rem;font-weight:700;color:#4ade80;margin-top:6px;">Carteira saudável — nenhuma ação pendente</div>
-      </div>"""
+    briefing_p1 = ""
+    if p1_items:
+        briefing_p1 = f"""
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#dc2626;">P1 — Resolver hoje</span>
+        <span style="font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:#fee2e2;color:#dc2626;">{len(p1_items)}</span>
+      </div>
+      <div style="border:1px solid #fecaca;border-radius:8px;overflow:hidden;background:white;">
+        <div style="display:grid;grid-template-columns:160px 1fr auto;background:#fef2f2;border-bottom:1px solid #fecaca;">
+          <div style="padding:7px 16px 7px 0;font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.05em;">Cliente</div>
+          <div style="padding:7px 16px;font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.05em;">Problema · Próximo passo</div>
+          <div style="padding:7px 0;font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.05em;">Dono</div>
+        </div>
+        {briefing_rows(p1_items, 'red')}
+      </div>
+    </div>"""
 
-    # ── Cards ────────────────────────────────────────────────────────────────
-    cards_html = ""
+    briefing_p2 = ""
+    if p2_items:
+        briefing_p2 = f"""
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#ca8a04;">P2 — Esta semana</span>
+        <span style="font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:#fef9c3;color:#ca8a04;">{len(p2_items)}</span>
+      </div>
+      <div style="border:1px solid #fde68a;border-radius:8px;overflow:hidden;background:white;">
+        <div style="display:grid;grid-template-columns:160px 1fr auto;background:#fefce8;border-bottom:1px solid #fde68a;">
+          <div style="padding:7px 16px 7px 0;font-size:11px;font-weight:700;color:#ca8a04;text-transform:uppercase;letter-spacing:.05em;">Cliente</div>
+          <div style="padding:7px 16px;font-size:11px;font-weight:700;color:#ca8a04;text-transform:uppercase;letter-spacing:.05em;">Aviso · Próximo passo</div>
+          <div style="padding:7px 0;font-size:11px;font-weight:700;color:#ca8a04;text-transform:uppercase;letter-spacing:.05em;">Dono</div>
+        </div>
+        {briefing_rows(p2_items, 'yellow')}
+      </div>
+    </div>"""
+
+    if not p1_items and not p2_items:
+        briefing_p1 = """
+    <div style="text-align:center;padding:32px 0;color:#16a34a;">
+      <div style="font-size:28px;margin-bottom:8px;">✓</div>
+      <div style="font-size:15px;font-weight:600;">Carteira saudável — nenhuma ação pendente</div>
+    </div>"""
+
+    # ── Cards ─────────────────────────────────────────────────────────────────
     sorted_results = sorted(
         results,
         key=lambda r: ({"red": 0, "yellow": 1, "green": 2}[r["health"]], r["client"]["nicho"], r["client"]["name"])
     )
 
+    cards_html = ""
     for cd in sorted_results:
-        cl = cd["client"]
-        h = cd["health"]
-        nicho_id = normalize(cl["nicho"])
+        cl   = cd["client"]
+        h    = cd["health"]
+        nicho = cl["nicho"]
+        nicho_css, nicho_id = NICHO_CSS.get(nicho, ("background:#f3f4f6;color:#374151;", normalize(nicho)))
+        _np = {k.strip(): v.strip() for k, v in (p.split(":", 1) for p in nicho_css.rstrip(";").split(";") if ":" in p)}
+        nicho_bg, nicho_col = _np.get("background", "#f3f4f6"), _np.get("color", "#374151")
 
-        dot_color = {"red": "#dc2626", "yellow": "#ca8a04", "green": "#16a34a"}[h]
-        border_color = {"red": "#fca5a5", "yellow": "#fde68a", "green": "#bbf7d0"}[h]
-        bg_color = {"red": "#fef2f2", "yellow": "#fefce8", "green": "white"}[h]
+        # Top border color per health
+        top_border = {"red": "#dc2626", "yellow": "#f59e0b", "green": "#22c55e"}[h]
 
-        # Prio badge
-        if h == "red":
-            prio_html = '<span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#dc2626;color:white;">P1</span>'
-        elif h == "yellow":
-            prio_html = '<span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#ca8a04;color:white;">P2</span>'
-        else:
-            prio_html = '<span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>'
+        # Prio chip
+        prio_chip = {
+            "red":    _chip("P1", "#fee2e2", "#dc2626"),
+            "yellow": _chip("P2", "#fef9c3", "#ca8a04"),
+            "green":  _chip("OK", "#f0fdf4", "#16a34a"),
+        }[h]
 
-        # Alertas no card
-        alert_rows = build_action_rows(cd["alerts"], "red") + build_action_rows(cd["warnings"], "yellow")
+        # Alert lines in card (condensed — detail is in briefing)
+        alert_lines = ""
+        all_issues = [("red", a) for a in cd["alerts"]] + [("yellow", w) for w in cd["warnings"]]
+        for lv, it in all_issues:
+            icon = "⚠" if lv == "red" else "⚡"
+            tc   = "#dc2626" if lv == "red" else "#92400e"
+            bc   = "#fef2f2" if lv == "red" else "#fefce8"
+            alert_lines += (f'<div style="font-size:12px;font-weight:600;color:{tc};'
+                            f'background:{bc};padding:7px 14px;margin:0 -1px;">'
+                            f'{icon} {it["title"]}</div>')
 
         # Meta rows
         meta_rows = ""
         for acc in cd["meta"]:
-            bal_str = f"R$ {fmt_br(acc['balance'])}" if acc["balance"] is not None else ""
-            burn_str = f"R$ {fmt_br(acc['burn_daily'])}/dia" if acc.get("burn_daily") else ""
-            days_str = f"{acc['days_left']}d restantes" if acc.get("days_left") else ""
-
-            meta_rows += f"""
-            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
-                {meta_status_pill(acc)}
-                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">{acc['name']}</span>
-              </div>"""
-            if bal_str or burn_str or days_str:
-                meta_rows += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;">'
-                if bal_str:
-                    meta_rows += f'<span style="font-size:.7rem;color:#374151;">Saldo: <strong>{bal_str}</strong></span>'
-                if burn_str:
-                    meta_rows += f'<span style="font-size:.7rem;color:#6b7280;">{burn_str}</span>'
-                if days_str:
-                    color = "#dc2626" if (acc.get("days_left") or 999) < 5 else ("#ca8a04" if (acc.get("days_left") or 999) < 10 else "#374151")
-                    meta_rows += f'<span style="font-size:.7rem;font-weight:700;color:{color};">{days_str}</span>'
-                meta_rows += "</div>"
-            meta_rows += "</div>"
-
+            meta_rows += meta_line(acc)
         if not cd["meta"] and (cl.get("meta_ids") or cl.get("meta_names")):
-            meta_rows = '<div style="font-size:.72rem;color:#dc2626;padding:4px 0;">Conta não encontrada na API</div>'
+            meta_rows = '<div style="font-size:13px;color:#dc2626;padding:6px 0;">Conta não encontrada</div>'
+        if not meta_rows:
+            meta_rows = '<div style="font-size:13px;color:#9ca3af;padding:6px 0;">Sem conta Meta mapeada</div>'
 
-        spend_total = ""
+        # Total spend
+        spend_line = ""
         if cd["total_spend_7d"] is not None and len(cd["meta"]) > 1:
-            spend_total = f'<div style="text-align:right;font-size:.68rem;color:#6b7280;margin-top:4px;">Total 7d: <strong>R$ {fmt_br(cd["total_spend_7d"])}</strong></div>'
+            spend_line = (f'<div style="text-align:right;font-size:11px;color:#9ca3af;padding-top:4px;">'
+                          f'Total 7d: R$ {fmt_br(cd["total_spend_7d"])}</div>')
 
-        note_html = f'<div style="font-size:.68rem;color:#9ca3af;font-style:italic;margin-top:4px;">{cl["note"]}</div>' if cl.get("note") else ""
+        # Report row
+        note_html = (f'<div style="font-size:11px;color:#9ca3af;margin-top:2px;">{cl["note"]}</div>'
+                     if cl.get("note") else "")
+        rdate = cd["report_date"] or ""
+        rdate_html = (f'<span style="font-size:11px;color:#9ca3af;">{rdate}</span>' if rdate else "")
+        report_row = (f'<div style="display:flex;align-items:center;gap:10px;padding:10px 0 2px;">'
+                      f'{report_badge_html(cd)}{rdate_html}'
+                      f'</div>{note_html}')
 
         cards_html += f"""
-    <div class="card" style="background:{bg_color};border:1.5px solid {border_color};border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
-         data-nicho="{nicho_id}" data-health="{h}" data-assessor="{cl.get('assessor','').lower()}">
-      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-        <div style="display:flex;align-items:center;gap:7px;">
-          <span style="width:9px;height:9px;border-radius:50%;background:{dot_color};flex-shrink:0;display:inline-block;"></span>
-          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">{cl['name']}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
-          {prio_html}
-          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;{nicho_badge_style(cl['nicho'])}">{cl['nicho']}</span>
-          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">{cl.get('assessor','?')}</span>
+  <div class="card" data-nicho="{nicho_id}" data-health="{h}" data-assessor="{cl.get('assessor','').lower()}"
+       style="background:white;border-radius:10px;border:1px solid #e5e7eb;overflow:hidden;
+              box-shadow:0 1px 4px rgba(0,0,0,.06);border-top:3px solid {top_border};">
+    <div style="padding:14px 16px 10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:5px;">{cl['name']}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          {_chip(nicho, nicho_bg, nicho_col, '11px')}
+          {_chip(cl.get('assessor','?'), '#f3f4f6', '#374151', '11px')}
         </div>
       </div>
-      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
-        {alert_rows}
-        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
-        {meta_rows}
-        {spend_total}
-        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
-        <div style="display:flex;align-items:center;gap:7px;">
-          {report_badge_html(cd)}
-          {'<span style="font-size:.68rem;color:#9ca3af;">' + (cd["report_date"] or "") + '</span>' if cd["report_date"] else ''}
-        </div>
-        {note_html}
-      </div>
-    </div>"""
+      {prio_chip}
+    </div>
+    {alert_lines}
+    <div style="padding:10px 16px 14px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:6px;">Meta Ads</div>
+      {meta_rows}
+      {spend_line}
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-top:12px;margin-bottom:2px;">Relatório</div>
+      {report_row}
+    </div>
+  </div>"""
 
     return f"""<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Painel Beatriz — Trilha</title>
 <style>
-  * {{ box-sizing:border-box;margin:0;padding:0; }}
-  body {{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#e9e8e4;color:#1a1a1a;min-height:100vh; }}
-  .card {{ transition:box-shadow .15s; }}
-  .card:hover {{ box-shadow:0 4px 16px rgba(0,0,0,.1) !important; }}
-  .filter-btn {{ padding:5px 12px;border-radius:20px;border:1.5px solid #d1d5db;background:white;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s;color:#374151;letter-spacing:.01em; }}
-  .filter-btn:hover {{ border-color:#ee4c20;color:#ee4c20; }}
-  .filter-btn.active {{ background:#1a1a1a;border-color:#1a1a1a;color:white; }}
-  .filter-btn.f-red.active {{ background:#dc2626;border-color:#dc2626; }}
-  .filter-btn.f-yellow.active {{ background:#ca8a04;border-color:#ca8a04; }}
-  .filter-btn.f-green.active {{ background:#16a34a;border-color:#16a34a; }}
-  .hidden {{ display:none !important; }}
+* {{ box-sizing:border-box; margin:0; padding:0; }}
+body {{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+        background:#f5f4f0;color:#111;min-height:100vh; }}
+.card {{ transition:box-shadow .15s,transform .15s; }}
+.card:hover {{ box-shadow:0 6px 20px rgba(0,0,0,.1) !important;transform:translateY(-1px); }}
+.hidden {{ display:none !important; }}
+.filter-btn {{ padding:6px 14px;border-radius:20px;border:1.5px solid #d1d5db;background:white;
+               font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;color:#374151; }}
+.filter-btn:hover {{ border-color:#ee4c20;color:#ee4c20; }}
+.filter-btn.active {{ background:#111;border-color:#111;color:white; }}
+.filter-btn.f-red.active {{ background:#dc2626;border-color:#dc2626; }}
+.filter-btn.f-yellow.active {{ background:#ca8a04;border-color:#ca8a04; }}
+.filter-btn.f-green.active {{ background:#16a34a;border-color:#16a34a; }}
+@media(max-width:600px){{
+  .briefing-table {{ display:none; }}
+  .briefing-mobile {{ display:block !important; }}
+}}
 </style>
 </head>
 <body>
 
-<!-- Header -->
-<div style="background:#1a1a1a;padding:16px 24px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;">
-  <span style="color:#ee4c20;font-weight:800;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;">Trilha</span>
-  <span style="color:white;font-weight:700;font-size:1.05rem;">Painel Beatriz</span>
-  <span style="color:#6b7280;font-size:.72rem;margin-left:auto;">Atualizado {now_str}</span>
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<div style="background:#111;padding:16px 28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+  <span style="color:#ee4c20;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;">Trilha</span>
+  <span style="color:white;font-size:17px;font-weight:700;">Painel Beatriz</span>
+  <span style="color:#6b7280;font-size:12px;margin-left:auto;">{now_str}</span>
 </div>
 
-<!-- Summary strip -->
-<div style="background:#111;display:flex;border-bottom:1px solid #222;">
-  <div style="flex:1;padding:14px 20px;text-align:center;border-right:1px solid #222;">
-    <div style="font-size:1.8rem;font-weight:900;color:white;line-height:1;">{n_total}</div>
-    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-top:3px;">Clientes</div>
+<!-- ── Métricas ────────────────────────────────────────────────────────── -->
+<div style="background:#1a1a1a;display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid #2a2a2a;">
+  <div style="padding:18px 24px;border-right:1px solid #2a2a2a;">
+    <div style="font-size:32px;font-weight:900;color:white;line-height:1;">{n_total}</div>
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#6b7280;margin-top:4px;">Clientes</div>
   </div>
-  <div style="flex:1;padding:14px 20px;text-align:center;border-right:1px solid #222;">
-    <div style="font-size:1.8rem;font-weight:900;color:#f87171;line-height:1;">{n_red}</div>
-    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-top:3px;">P1 Crítico</div>
+  <div style="padding:18px 24px;border-right:1px solid #2a2a2a;">
+    <div style="font-size:32px;font-weight:900;color:#f87171;line-height:1;">{n_red}</div>
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#6b7280;margin-top:4px;">P1 Crítico</div>
   </div>
-  <div style="flex:1;padding:14px 20px;text-align:center;border-right:1px solid #222;">
-    <div style="font-size:1.8rem;font-weight:900;color:#fbbf24;line-height:1;">{n_yellow}</div>
-    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-top:3px;">P2 Atenção</div>
+  <div style="padding:18px 24px;border-right:1px solid #2a2a2a;">
+    <div style="font-size:32px;font-weight:900;color:#fbbf24;line-height:1;">{n_yellow}</div>
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#6b7280;margin-top:4px;">P2 Atenção</div>
   </div>
-  <div style="flex:1;padding:14px 20px;text-align:center;">
-    <div style="font-size:1.8rem;font-weight:900;color:#4ade80;line-height:1;">{n_green}</div>
-    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-top:3px;">Saudável</div>
-  </div>
-</div>
-
-<!-- Briefing de ações -->
-<div style="background:#161616;padding:20px 24px;border-bottom:1px solid #222;">
-  <div style="max-width:900px;">
-    <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:14px;">Briefing operacional — foco do dia</div>
-    {briefing_html}
+  <div style="padding:18px 24px;">
+    <div style="font-size:32px;font-weight:900;color:#4ade80;line-height:1;">{n_green}</div>
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#6b7280;margin-top:4px;">Saudável</div>
   </div>
 </div>
 
-<!-- Filtros -->
-<div style="background:white;padding:10px 20px;display:flex;flex-wrap:wrap;gap:7px;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:10;">
-  <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;align-self:center;margin-right:2px;">Prioridade</span>
+<!-- ── Briefing ────────────────────────────────────────────────────────── -->
+<div style="background:white;border-bottom:1px solid #e5e7eb;padding:28px 28px 24px;">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;margin-bottom:20px;">Briefing do dia</div>
+  {briefing_p1}
+  {briefing_p2}
+</div>
+
+<!-- ── Filtros ─────────────────────────────────────────────────────────── -->
+<div style="background:white;padding:12px 28px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+            border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+  <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-right:2px;">Prioridade</span>
   <button class="filter-btn active" data-filter="all">Todos</button>
-  <button class="filter-btn f-red" data-filter="health:red">P1 Crítico</button>
+  <button class="filter-btn f-red"    data-filter="health:red">P1 Crítico</button>
   <button class="filter-btn f-yellow" data-filter="health:yellow">P2 Atenção</button>
-  <button class="filter-btn f-green" data-filter="health:green">Saudável</button>
-  <div style="width:1px;background:#e5e7eb;margin:0 4px;"></div>
-  <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;align-self:center;margin-right:2px;">Nicho</span>
+  <button class="filter-btn f-green"  data-filter="health:green">Saudável</button>
+  <div style="width:1px;height:20px;background:#e5e7eb;margin:0 4px;"></div>
+  <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-right:2px;">Nicho</span>
   <button class="filter-btn" data-filter="nicho:imobiliario">Imobiliário</button>
   <button class="filter-btn" data-filter="nicho:hotelaria">Hotelaria</button>
   <button class="filter-btn" data-filter="nicho:auto">Auto</button>
-  <div style="width:1px;background:#e5e7eb;margin:0 4px;"></div>
-  <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;align-self:center;margin-right:2px;">Assessor</span>
+  <div style="width:1px;height:20px;background:#e5e7eb;margin:0 4px;"></div>
+  <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-right:2px;">Assessor</span>
   <button class="filter-btn" data-filter="assessor:enrique">Enrique</button>
   <button class="filter-btn" data-filter="assessor:bruno">Bruno</button>
 </div>
 
-<!-- Grid de cards -->
-<div id="grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;padding:18px 20px;">
+<!-- ── Grid ────────────────────────────────────────────────────────────── -->
+<div id="grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding:24px 28px;">
 {cards_html}
 </div>
 
-<div style="text-align:center;padding:24px;font-size:.7rem;color:#9ca3af;">
-  Trilha Performance Digital · Carteira Beatriz · Atualiza a cada 6h
+<div style="text-align:center;padding:28px;font-size:12px;color:#9ca3af;">
+  Trilha Performance Digital · Carteira Beatriz · atualiza a cada 6h
 </div>
 
 <script>
-  const btns = document.querySelectorAll('.filter-btn');
-  const cards = document.querySelectorAll('#grid .card');
-
-  function applyFilters() {{
-    const active = [...btns].filter(b => b.classList.contains('active')).map(b => b.dataset.filter);
-    if (active.includes('all')) {{ cards.forEach(c => c.classList.remove('hidden')); return; }}
-    cards.forEach(card => {{
-      const show = active.every(f => {{
-        if (f.startsWith('health:'))   return card.dataset.health   === f.split(':')[1];
-        if (f.startsWith('nicho:'))    return card.dataset.nicho    === f.split(':')[1];
-        if (f.startsWith('assessor:')) return card.dataset.assessor === f.split(':')[1];
-        return true;
-      }});
-      card.classList.toggle('hidden', !show);
+const btns  = document.querySelectorAll('.filter-btn');
+const cards = document.querySelectorAll('#grid .card');
+function applyFilters() {{
+  const active = [...btns].filter(b => b.classList.contains('active')).map(b => b.dataset.filter);
+  if (active.includes('all')) {{ cards.forEach(c => c.classList.remove('hidden')); return; }}
+  cards.forEach(c => {{
+    const show = active.every(f => {{
+      if (f.startsWith('health:'))   return c.dataset.health   === f.slice(7);
+      if (f.startsWith('nicho:'))    return c.dataset.nicho    === f.slice(6);
+      if (f.startsWith('assessor:')) return c.dataset.assessor === f.slice(9);
+      return true;
     }});
-  }}
-
-  btns.forEach(btn => {{
-    btn.addEventListener('click', () => {{
-      const f = btn.dataset.filter;
-      if (f === 'all') {{ btns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); }}
-      else {{
-        document.querySelector('[data-filter="all"]').classList.remove('active');
-        btn.classList.toggle('active');
-        if (![...btns].some(b => b.classList.contains('active')))
-          document.querySelector('[data-filter="all"]').classList.add('active');
-      }}
-      applyFilters();
-    }});
+    c.classList.toggle('hidden', !show);
   }});
+}}
+btns.forEach(btn => {{
+  btn.addEventListener('click', () => {{
+    const f = btn.dataset.filter;
+    if (f === 'all') {{ btns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); }}
+    else {{
+      document.querySelector('[data-filter="all"]').classList.remove('active');
+      btn.classList.toggle('active');
+      if (![...btns].some(b => b.classList.contains('active')))
+        document.querySelector('[data-filter="all"]').classList.add('active');
+    }}
+    applyFilters();
+  }});
+}});
 </script>
 </body>
 </html>"""
