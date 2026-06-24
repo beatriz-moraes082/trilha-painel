@@ -5,1047 +5,1039 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel Beatriz — Trilha</title>
 <style>
-  :root {
-    --orange: #ee4c20;
-    --sand: #e9e8e4;
-    --dark: #1a1a1a;
-    --green: #16a34a;
-    --yellow: #ca8a04;
-    --red: #dc2626;
-    --bg-green: #f0fdf4;
-    --bg-yellow: #fefce8;
-    --bg-red: #fef2f2;
-    --border-green: #bbf7d0;
-    --border-yellow: #fde68a;
-    --border-red: #fecaca;
-    --text-muted: #6b7280;
-    --text-sm: 0.78rem;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: var(--sand);
-    color: var(--dark);
-    min-height: 100vh;
-  }
-  /* ── Header ── */
-  .header {
-    background: var(--dark);
-    color: white;
-    padding: 20px 28px 16px;
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  .header-logo {
-    font-size: 1.05rem;
-    font-weight: 700;
-    letter-spacing: -.02em;
-    color: var(--orange);
-    text-transform: uppercase;
-  }
-  .header-title {
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: white;
-  }
-  .header-updated {
-    font-size: var(--text-sm);
-    color: #9ca3af;
-    margin-left: auto;
-  }
-  /* ── Summary bar ── */
-  .summary-bar {
-    background: #111;
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid #333;
-  }
-  .summary-item {
-    flex: 1;
-    padding: 14px 20px;
-    text-align: center;
-    border-right: 1px solid #333;
-  }
-  .summary-item:last-child { border-right: none; }
-  .summary-count {
-    font-size: 1.7rem;
-    font-weight: 800;
-    line-height: 1;
-  }
-  .summary-label {
-    font-size: 0.68rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    margin-top: 4px;
-    color: #9ca3af;
-  }
-  .summary-item.s-red .summary-count { color: #f87171; }
-  .summary-item.s-yellow .summary-count { color: #fbbf24; }
-  .summary-item.s-green .summary-count { color: #4ade80; }
-  .summary-item.s-total .summary-count { color: white; }
-  /* ── Filters ── */
-  .filters {
-    padding: 14px 20px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    background: white;
-    border-bottom: 1px solid #e5e7eb;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .filters label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--text-muted);
-    align-self: center;
-    margin-right: 4px;
-  }
-  .filter-btn {
-    padding: 5px 12px;
-    border-radius: 20px;
-    border: 1.5px solid #d1d5db;
-    background: white;
-    font-size: var(--text-sm);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all .15s;
-    color: var(--dark);
-  }
-  .filter-btn:hover { border-color: var(--orange); color: var(--orange); }
-  .filter-btn.active { background: var(--dark); border-color: var(--dark); color: white; }
-  .filter-btn.f-red.active { background: var(--red); border-color: var(--red); }
-  .filter-btn.f-yellow.active { background: var(--yellow); border-color: var(--yellow); }
-  .filter-btn.f-green.active { background: var(--green); border-color: var(--green); }
-  .filter-sep { width: 1px; background: #e5e7eb; margin: 0 4px; }
-  /* ── Grid ── */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 14px;
-    padding: 20px;
-  }
-  /* ── Card ── */
-  .card {
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06);
-    border: 1.5px solid #e5e7eb;
-    transition: box-shadow .15s;
-  }
-  .card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.1); }
-  .card-red { border-color: var(--border-red); background: var(--bg-red); }
-  .card-yellow { border-color: var(--border-yellow); background: var(--bg-yellow); }
-  .card-green { border-color: var(--border-green); }
-  .card-header {
-    padding: 12px 14px 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 8px;
-    border-bottom: 1px solid rgba(0,0,0,.06);
-  }
-  .card-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .client-name {
-    font-size: .92rem;
-    font-weight: 700;
-    color: var(--dark);
-  }
-  .card-badges {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 3px;
-  }
-  .badge-nicho {
-    font-size: .62rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    padding: 2px 7px;
-    border-radius: 10px;
-  }
-  .nicho-imobiliario { background: #ede9fe; color: #6d28d9; }
-  .nicho-hotelaria   { background: #fce7f3; color: #9d174d; }
-  .nicho-auto        { background: #dbeafe; color: #1d4ed8; }
-  .badge-assessor {
-    font-size: .62rem;
-    color: var(--text-muted);
-    font-weight: 600;
-  }
-  .card-body {
-    padding: 10px 14px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .section-label {
-    font-size: .62rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
-  .meta-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 10px;
-    font-size: var(--text-sm);
-    align-items: baseline;
-    padding: 2px 0;
-    border-bottom: 1px solid rgba(0,0,0,.04);
-  }
-  .meta-name {
-    font-weight: 600;
-    color: var(--dark);
-    font-size: .7rem;
-  }
-  .meta-stat { color: var(--dark); }
-  .meta-bal { color: var(--text-muted); }
-  .meta-sp  { color: var(--text-muted); }
-  .meta-warn { color: var(--red); font-size: .75rem; }
-  .spend-total {
-    font-size: .72rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-align: right;
-    margin-top: 2px;
-  }
-  .report-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: var(--text-sm);
-  }
-  .report-date { color: var(--text-muted); font-size: .7rem; }
-  .client-note { font-size: .68rem; color: var(--text-muted); font-style: italic; }
-  .alert {
-    font-size: .75rem;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 5px;
-    margin-bottom: 2px;
-  }
-  .alert-red    { background: #fee2e2; color: #991b1b; }
-  .alert-yellow { background: #fef3c7; color: #92400e; }
-  /* Badges */
-  .badge {
-    display: inline-block;
-    font-size: .66rem;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 10px;
-  }
-  .badge-green  { background: #dcfce7; color: #166534; }
-  .badge-yellow { background: #fef9c3; color: #854d0e; }
-  .badge-red    { background: #fee2e2; color: #991b1b; }
-  .badge-gray   { background: #f3f4f6; color: #6b7280; }
-  .hidden { display: none !important; }
-  /* ── Footer ── */
-  .footer {
-    text-align: center;
-    padding: 28px;
-    font-size: .72rem;
-    color: var(--text-muted);
-  }
+  * { box-sizing:border-box;margin:0;padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#e9e8e4;color:#1a1a1a;min-height:100vh; }
+  .card { transition:box-shadow .15s; }
+  .card:hover { box-shadow:0 4px 16px rgba(0,0,0,.1) !important; }
+  .filter-btn { padding:5px 12px;border-radius:20px;border:1.5px solid #d1d5db;background:white;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s;color:#374151;letter-spacing:.01em; }
+  .filter-btn:hover { border-color:#ee4c20;color:#ee4c20; }
+  .filter-btn.active { background:#1a1a1a;border-color:#1a1a1a;color:white; }
+  .filter-btn.f-red.active { background:#dc2626;border-color:#dc2626; }
+  .filter-btn.f-yellow.active { background:#ca8a04;border-color:#ca8a04; }
+  .filter-btn.f-green.active { background:#16a34a;border-color:#16a34a; }
+  .hidden { display:none !important; }
 </style>
 </head>
 <body>
 
-<header class="header">
-  <span class="header-logo">Trilha</span>
-  <span class="header-title">Painel Beatriz</span>
-  <span class="header-updated">Atualizado 24/06/2026 às 19:55 BRT</span>
-</header>
+<!-- Header -->
+<div style="background:#1a1a1a;padding:16px 24px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;">
+  <span style="color:#ee4c20;font-weight:800;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;">Trilha</span>
+  <span style="color:white;font-weight:700;font-size:1.05rem;">Painel Beatriz</span>
+  <span style="color:#6b7280;font-size:.72rem;margin-left:auto;">Atualizado 24/06/2026 às 20:07 BRT</span>
+</div>
 
-<div class="summary-bar">
-  <div class="summary-item s-total">
-    <div class="summary-count">23</div>
-    <div class="summary-label">Clientes</div>
+<!-- Summary strip -->
+<div style="background:#111;display:flex;border-bottom:1px solid #222;">
+  <div style="flex:1;padding:14px 20px;text-align:center;border-right:1px solid #222;">
+    <div style="font-size:1.8rem;font-weight:900;color:white;line-height:1;">23</div>
+    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-top:3px;">Clientes</div>
   </div>
-  <div class="summary-item s-red">
-    <div class="summary-count">4</div>
-    <div class="summary-label">Crítico</div>
+  <div style="flex:1;padding:14px 20px;text-align:center;border-right:1px solid #222;">
+    <div style="font-size:1.8rem;font-weight:900;color:#f87171;line-height:1;">4</div>
+    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-top:3px;">P1 Crítico</div>
   </div>
-  <div class="summary-item s-yellow">
-    <div class="summary-count">7</div>
-    <div class="summary-label">Atenção</div>
+  <div style="flex:1;padding:14px 20px;text-align:center;border-right:1px solid #222;">
+    <div style="font-size:1.8rem;font-weight:900;color:#fbbf24;line-height:1;">7</div>
+    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-top:3px;">P2 Atenção</div>
   </div>
-  <div class="summary-item s-green">
-    <div class="summary-count">12</div>
-    <div class="summary-label">Saudável</div>
+  <div style="flex:1;padding:14px 20px;text-align:center;">
+    <div style="font-size:1.8rem;font-weight:900;color:#4ade80;line-height:1;">12</div>
+    <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-top:3px;">Saudável</div>
   </div>
 </div>
 
-<div class="filters">
-  <label>Status</label>
+<!-- Briefing de ações -->
+<div style="background:#161616;padding:20px 24px;border-bottom:1px solid #222;">
+  <div style="max-width:900px;">
+    <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:14px;">Briefing operacional — foco do dia</div>
+    
+      <div style="margin-bottom:16px;">
+        <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#f87171;margin-bottom:8px;">
+          ⚠ Ações P1 — resolver hoje (5)
+        </div>
+        
+          <div style="border-left:3px solid #f87171;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#f87171;">P1 · Taiyo Honda</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">Taiyo - Novos: saldo para 4d</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#dc2626;color:white;">Enrique</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Recarga urgente esta semana. ~R$12.712 pra 30d de runway.</div>
+          </div>
+          <div style="border-left:3px solid #f87171;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#f87171;">P1 · Taiyo Honda</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">Relatório automático falhou</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#dc2626;color:white;">Bia</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Ver logs em github.com/beatriz-moraes082/taiyo-report/actions e corrigir. Re-disparar via workflow_dispatch.</div>
+          </div>
+          <div style="border-left:3px solid #f87171;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#f87171;">P1 · CROS Empreendimentos</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">Reserva do Peba: saldo zerado — entrega parada</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#dc2626;color:white;">Bruno</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Recarga urgente. Calcular valor de recarga.</div>
+          </div>
+          <div style="border-left:3px solid #f87171;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#f87171;">P1 · Fellipe Carneiro</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">Relatório automático falhou</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#dc2626;color:white;">Bia</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Ver logs em github.com/beatriz-moraes082/fellipe-report/actions e corrigir. Re-disparar via workflow_dispatch.</div>
+          </div>
+          <div style="border-left:3px solid #f87171;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#f87171;">P1 · HL Prime</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">HL Prime : saldo zerado — entrega parada</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#dc2626;color:white;">Enrique</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Recarga urgente. Calcular valor de recarga.</div>
+          </div>
+      </div>
+      <div>
+        <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#fbbf24;margin-bottom:8px;">
+          ⚡ Ações P2 — esta semana (7)
+        </div>
+        
+          <div style="border-left:3px solid #fbbf24;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fbbf24;">P2 · MotoChefe</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">Grupo MGS [Moto Chefe/ Mixmobi]: saldo para ~6d</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Enrique</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Avisar cliente sobre recarga. ~R$4.515 pra 30d.</div>
+          </div>
+          <div style="border-left:3px solid #fbbf24;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fbbf24;">P2 · Inove Engenharia</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">Mansões - Inove Engenharia: saldo para ~5d</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Bruno</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Avisar cliente sobre recarga. ~R$1.037 pra 30d.</div>
+          </div>
+          <div style="border-left:3px solid #fbbf24;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fbbf24;">P2 · Maia Imóveis</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">Maia Imóveis [Boleto]: saldo para ~9d</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Bruno</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Avisar cliente sobre recarga. ~R$9.876 pra 30d.</div>
+          </div>
+          <div style="border-left:3px solid #fbbf24;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fbbf24;">P2 · Queiroz Azevedo</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">Queiroz Azevedo: saldo para ~7d</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Enrique</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Avisar cliente sobre recarga. ~R$2.232 pra 30d.</div>
+          </div>
+          <div style="border-left:3px solid #fbbf24;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fbbf24;">P2 · Henrique</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">Conta Meta não encontrada na API</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Bia</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Verificar se a conta ainda está associada ao token. Checar BM.</div>
+          </div>
+          <div style="border-left:3px solid #fbbf24;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fbbf24;">P2 · Ypê</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">Conta Meta não encontrada na API</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Bia</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Verificar se a conta ainda está associada ao token. Checar BM.</div>
+          </div>
+          <div style="border-left:3px solid #fbbf24;background:#1f1f1f;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fbbf24;">P2 · Mix Mobi</span>
+                <div style="font-size:.82rem;font-weight:700;color:white;margin-top:1px;">Grupo MGS [Moto Chefe/ Mixmobi]: saldo para ~6d</div>
+              </div>
+              <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Enrique</span>
+            </div>
+            <div style="font-size:.74rem;color:#9ca3af;margin-top:4px;line-height:1.45;">Avisar cliente sobre recarga. ~R$4.515 pra 30d.</div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Filtros -->
+<div style="background:white;padding:10px 20px;display:flex;flex-wrap:wrap;gap:7px;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:10;">
+  <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;align-self:center;margin-right:2px;">Prioridade</span>
   <button class="filter-btn active" data-filter="all">Todos</button>
-  <button class="filter-btn f-red" data-filter="health:red">Crítico</button>
-  <button class="filter-btn f-yellow" data-filter="health:yellow">Atenção</button>
+  <button class="filter-btn f-red" data-filter="health:red">P1 Crítico</button>
+  <button class="filter-btn f-yellow" data-filter="health:yellow">P2 Atenção</button>
   <button class="filter-btn f-green" data-filter="health:green">Saudável</button>
-  <div class="filter-sep"></div>
-  <label>Nicho</label>
+  <div style="width:1px;background:#e5e7eb;margin:0 4px;"></div>
+  <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;align-self:center;margin-right:2px;">Nicho</span>
   <button class="filter-btn" data-filter="nicho:imobiliario">Imobiliário</button>
   <button class="filter-btn" data-filter="nicho:hotelaria">Hotelaria</button>
   <button class="filter-btn" data-filter="nicho:auto">Auto</button>
-  <div class="filter-sep"></div>
-  <label>Assessor</label>
+  <div style="width:1px;background:#e5e7eb;margin:0 4px;"></div>
+  <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;align-self:center;margin-right:2px;">Assessor</span>
   <button class="filter-btn" data-filter="assessor:enrique">Enrique</button>
   <button class="filter-btn" data-filter="assessor:bruno">Bruno</button>
 </div>
 
-<div class="grid" id="grid">
+<!-- Grid de cards -->
+<div id="grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;padding:18px 20px;">
 
-    <div class="card card-red" data-nicho="auto" data-health="red" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-red" style="background:#dc2626"></span>
-          <span class="client-name">Taiyo Honda</span>
+    <div class="card" style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="auto" data-health="red" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#dc2626;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Taiyo Honda</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-auto">Auto</span>
-          <span class="badge-assessor">Enrique</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="alert alert-red">⚠ Saldo Taiyo - Novos para 4d</div><div class="alert alert-red">⚠ Relatório automático falhou</div>
-        <div class="section-label">META ADS</div>
-        
-            <div class="meta-row">
-              <span class="meta-name">Taiyo - Novos</span>
-              <span class="meta-stat">🟢 5 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 1.800</span>
-              <span class="meta-sp">R$ 2.966/sem</span>
-            </div>
-            <div class="meta-row">
-              <span class="meta-name">Taiyo - Pós-vendas</span>
-              <span class="meta-stat">🟢 3 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 1.567</span>
-              <span class="meta-sp">R$ 261/sem</span>
-            </div>
-        <div class="spend-total">Total 7d: R$ 3.228</div>
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-red">FALHOU</span>
-          <span class="report-date">2026-06-22</span>
-        </div>
-        
-      </div>
-    </div>
-    <div class="card card-red" data-nicho="imobiliario" data-health="red" data-assessor="bruno">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-red" style="background:#dc2626"></span>
-          <span class="client-name">CROS Empreendimentos</span>
-        </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Bruno</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#dc2626;color:white;">P1</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#dbeafe;color:#1e40af;">Auto</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
-        <div class="alert alert-red">⚠ Conta Reserva do Peba zerada</div>
-        <div class="section-label">META ADS</div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-            <div class="meta-row">
-              <span class="meta-name">Reserva do Peba</span>
-              <span class="meta-stat">🟢 2 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 0</span>
-              <span class="meta-sp">R$ 0/sem</span>
-            </div>
+        <div style="border-left:3px solid #fca5a5;background:#fee2e2;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚠ Taiyo - Novos: saldo para 4d</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#dc2626;color:white;">Enrique</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Recarga urgente esta semana. ~R$12.712 pra 30d de runway.</div>
+        </div>
+        <div style="border-left:3px solid #fca5a5;background:#fee2e2;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚠ Relatório automático falhou</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#dc2626;color:white;">Bia</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Ver logs em github.com/beatriz-moraes082/taiyo-report/actions e corrigir. Re-disparar via workflow_dispatch.</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 5 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Taiyo - Novos</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 1.797</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 424/dia</span><span style="font-size:.7rem;font-weight:700;color:#dc2626;">4d restantes</span></div></div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 3 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Taiyo - Pós-vendas</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 1.566</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 37/dia</span><span style="font-size:.7rem;font-weight:700;color:#374151;">41d restantes</span></div></div>
+        <div style="text-align:right;font-size:.68rem;color:#6b7280;margin-top:4px;">Total 7d: <strong>R$ 3.228</strong></div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#fee2e2;color:#991b1b;">FALHOU</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
         </div>
         
       </div>
     </div>
-    <div class="card card-red" data-nicho="imobiliario" data-health="red" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-red" style="background:#dc2626"></span>
-          <span class="client-name">Fellipe Carneiro</span>
+    <div class="card" style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="red" data-assessor="bruno">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#dc2626;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">CROS Empreendimentos</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#dc2626;color:white;">P1</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Bruno</span>
         </div>
       </div>
-      <div class="card-body">
-        <div class="alert alert-red">⚠ Relatório automático falhou</div>
-        <div class="section-label">META ADS</div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-            <div class="meta-row">
-              <span class="meta-name">BM3 - FORTENA IMOB</span>
-              <span class="meta-stat">🟢 1 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 1.009</span>
-              <span class="meta-sp">R$ 419/sem</span>
-            </div>
+        <div style="border-left:3px solid #fca5a5;background:#fee2e2;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚠ Reserva do Peba: saldo zerado — entrega parada</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#dc2626;color:white;">Bruno</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Recarga urgente. Calcular valor de recarga.</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-red">FALHOU</span>
-          <span class="report-date">2026-06-22</span>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 2 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Reserva do Peba</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 0</strong></span></div></div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
         </div>
         
       </div>
     </div>
-    <div class="card card-red" data-nicho="imobiliario" data-health="red" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-red" style="background:#dc2626"></span>
-          <span class="client-name">HL Prime</span>
+    <div class="card" style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="red" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#dc2626;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Fellipe Carneiro</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#dc2626;color:white;">P1</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
-        <div class="alert alert-red">⚠ Conta HL Prime  zerada</div>
-        <div class="section-label">META ADS</div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-            <div class="meta-row">
-              <span class="meta-name">HL Prime </span>
-              <span class="meta-stat">🟢 6 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 0</span>
-              <span class="meta-sp">R$ 0/sem</span>
-            </div>
+        <div style="border-left:3px solid #fca5a5;background:#fee2e2;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚠ Relatório automático falhou</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#dc2626;color:white;">Bia</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Ver logs em github.com/beatriz-moraes082/fellipe-report/actions e corrigir. Re-disparar via workflow_dispatch.</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-gray">Manual</span>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 1 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">BM3 - FORTENA IMOB</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 1.009</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 60/dia</span><span style="font-size:.7rem;font-weight:700;color:#374151;">16d restantes</span></div></div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#fee2e2;color:#991b1b;">FALHOU</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card" style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="red" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#dc2626;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">HL Prime</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#dc2626;color:white;">P1</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
+        </div>
+      </div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
+        
+        <div style="border-left:3px solid #fca5a5;background:#fee2e2;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚠ HL Prime : saldo zerado — entrega parada</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#dc2626;color:white;">Enrique</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Recarga urgente. Calcular valor de recarga.</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
+        
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 6 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">HL Prime </span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 0</strong></span></div></div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3f4f6;color:#6b7280;">Manual</span>
           
         </div>
-        <div class="client-note">Relatório manual</div>
+        <div style="font-size:.68rem;color:#9ca3af;font-style:italic;margin-top:4px;">Relatório manual</div>
       </div>
     </div>
-    <div class="card card-yellow" data-nicho="auto" data-health="yellow" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-yellow" style="background:#ca8a04"></span>
-          <span class="client-name">Mix Mobi</span>
+    <div class="card" style="background:#fefce8;border:1.5px solid #fde68a;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="auto" data-health="yellow" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#ca8a04;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Mix Mobi</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-auto">Auto</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#ca8a04;color:white;">P2</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#dbeafe;color:#1e40af;">Auto</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
-        <div class="alert alert-yellow">⚡ Saldo Grupo MGS [Moto Chefe/ Mixmobi] para ~6d</div>
-        <div class="section-label">META ADS</div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-            <div class="meta-row">
-              <span class="meta-name">Grupo MGS [Moto Chefe/ Mixmobi]</span>
-              <span class="meta-stat">🟢 4 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 1.009</span>
-              <span class="meta-sp">R$ 1.054/sem</span>
-            </div>
+        <div style="border-left:3px solid #fde047;background:#fef9c3;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚡ Grupo MGS [Moto Chefe/ Mixmobi]: saldo para ~6d</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Enrique</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Avisar cliente sobre recarga. ~R$4.515 pra 30d.</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-gray">Manual</span>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 4 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Grupo MGS [Moto Chefe/ Mixmobi]</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 1.008</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 151/dia</span><span style="font-size:.7rem;font-weight:700;color:#ca8a04;">6d restantes</span></div></div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3f4f6;color:#6b7280;">Manual</span>
           
         </div>
-        <div class="client-note">Conta Meta compartilhada com MotoChefe</div>
+        <div style="font-size:.68rem;color:#9ca3af;font-style:italic;margin-top:4px;">Conta Meta compartilhada com MotoChefe</div>
       </div>
     </div>
-    <div class="card card-yellow" data-nicho="auto" data-health="yellow" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-yellow" style="background:#ca8a04"></span>
-          <span class="client-name">MotoChefe</span>
+    <div class="card" style="background:#fefce8;border:1.5px solid #fde68a;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="auto" data-health="yellow" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#ca8a04;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">MotoChefe</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-auto">Auto</span>
-          <span class="badge-assessor">Enrique</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="alert alert-yellow">⚡ Saldo Grupo MGS [Moto Chefe/ Mixmobi] para ~6d</div>
-        <div class="section-label">META ADS</div>
-        
-            <div class="meta-row">
-              <span class="meta-name">Grupo MGS [Moto Chefe/ Mixmobi]</span>
-              <span class="meta-stat">🟢 4 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 1.009</span>
-              <span class="meta-sp">R$ 1.054/sem</span>
-            </div>
-        
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
-        </div>
-        
-      </div>
-    </div>
-    <div class="card card-yellow" data-nicho="imobiliario" data-health="yellow" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-yellow" style="background:#ca8a04"></span>
-          <span class="client-name">Henrique</span>
-        </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#ca8a04;color:white;">P2</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#dbeafe;color:#1e40af;">Auto</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
-        <div class="alert alert-yellow">⚡ Conta Meta não encontrada na API</div>
-        <div class="section-label">META ADS</div>
-        <div class="meta-row meta-warn">conta não encontrada</div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
+        <div style="border-left:3px solid #fde047;background:#fef9c3;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚡ Grupo MGS [Moto Chefe/ Mixmobi]: saldo para ~6d</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Enrique</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Avisar cliente sobre recarga. ~R$4.515 pra 30d.</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
+        
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 4 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Grupo MGS [Moto Chefe/ Mixmobi]</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 1.008</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 151/dia</span><span style="font-size:.7rem;font-weight:700;color:#ca8a04;">6d restantes</span></div></div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
         </div>
         
       </div>
     </div>
-    <div class="card card-yellow" data-nicho="imobiliario" data-health="yellow" data-assessor="bruno">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-yellow" style="background:#ca8a04"></span>
-          <span class="client-name">Inove Engenharia</span>
+    <div class="card" style="background:#fefce8;border:1.5px solid #fde68a;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="yellow" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#ca8a04;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Henrique</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Bruno</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#ca8a04;color:white;">P2</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
-        <div class="alert alert-yellow">⚡ Saldo Mansões - Inove Engenharia para ~5d</div>
-        <div class="section-label">META ADS</div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-            <div class="meta-row">
-              <span class="meta-name">Mansões - Inove Engenharia</span>
-              <span class="meta-stat">🟢 1 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 200</span>
-              <span class="meta-sp">R$ 242/sem</span>
-            </div>
-            <div class="meta-row">
-              <span class="meta-name">UANÁ - Inove Engenharia</span>
-              <span class="meta-stat">🟢 1 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 667</span>
-              <span class="meta-sp">R$ 306/sem</span>
-            </div>
-        <div class="spend-total">Total 7d: R$ 548</div>
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
+        <div style="border-left:3px solid #fde047;background:#fef9c3;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚡ Conta Meta não encontrada na API</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Bia</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Verificar se a conta ainda está associada ao token. Checar BM.</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
+        <div style="font-size:.72rem;color:#dc2626;padding:4px 0;">Conta não encontrada na API</div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
         </div>
         
       </div>
     </div>
-    <div class="card card-yellow" data-nicho="imobiliario" data-health="yellow" data-assessor="bruno">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-yellow" style="background:#ca8a04"></span>
-          <span class="client-name">Maia Imóveis</span>
+    <div class="card" style="background:#fefce8;border:1.5px solid #fde68a;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="yellow" data-assessor="bruno">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#ca8a04;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Inove Engenharia</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Bruno</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="alert alert-yellow">⚡ Saldo Maia Imóveis [Boleto] para ~9d</div>
-        <div class="section-label">META ADS</div>
-        
-            <div class="meta-row">
-              <span class="meta-name">Maia Imóveis [Boleto]</span>
-              <span class="meta-stat">🟢 8 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 3.172</span>
-              <span class="meta-sp">R$ 2.305/sem</span>
-            </div>
-        
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 0d</span>
-          <span class="report-date">2026-06-24</span>
-        </div>
-        
-      </div>
-    </div>
-    <div class="card card-yellow" data-nicho="imobiliario" data-health="yellow" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-yellow" style="background:#ca8a04"></span>
-          <span class="client-name">Queiroz Azevedo</span>
-        </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#ca8a04;color:white;">P2</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Bruno</span>
         </div>
       </div>
-      <div class="card-body">
-        <div class="alert alert-yellow">⚡ Saldo Queiroz Azevedo para ~7d</div>
-        <div class="section-label">META ADS</div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-            <div class="meta-row">
-              <span class="meta-name">Queiroz Azevedo</span>
-              <span class="meta-stat">🟢 2 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 525</span>
-              <span class="meta-sp">R$ 521/sem</span>
-            </div>
+        <div style="border-left:3px solid #fde047;background:#fef9c3;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚡ Mansões - Inove Engenharia: saldo para ~5d</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Bruno</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Avisar cliente sobre recarga. ~R$1.037 pra 30d.</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 1 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Mansões - Inove Engenharia</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 199</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 35/dia</span><span style="font-size:.7rem;font-weight:700;color:#ca8a04;">5d restantes</span></div></div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 1 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">UANÁ - Inove Engenharia</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 666</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 44/dia</span><span style="font-size:.7rem;font-weight:700;color:#374151;">15d restantes</span></div></div>
+        <div style="text-align:right;font-size:.68rem;color:#6b7280;margin-top:4px;">Total 7d: <strong>R$ 548</strong></div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
         </div>
         
       </div>
     </div>
-    <div class="card card-yellow" data-nicho="imobiliario" data-health="yellow" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-yellow" style="background:#ca8a04"></span>
-          <span class="client-name">Ypê</span>
+    <div class="card" style="background:#fefce8;border:1.5px solid #fde68a;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="yellow" data-assessor="bruno">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#ca8a04;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Maia Imóveis</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Enrique</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="alert alert-yellow">⚡ Conta Meta não encontrada na API</div>
-        <div class="section-label">META ADS</div>
-        <div class="meta-row meta-warn">conta não encontrada</div>
-        
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
-        </div>
-        
-      </div>
-    </div>
-    <div class="card card-green" data-nicho="hotelaria" data-health="green" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">Hotel Ponta Verde</span>
-        </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-hotelaria">Hotelaria</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#ca8a04;color:white;">P2</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Bruno</span>
         </div>
       </div>
-      <div class="card-body">
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-        <div class="section-label">META ADS</div>
+        <div style="border-left:3px solid #fde047;background:#fef9c3;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚡ Maia Imóveis [Boleto]: saldo para ~9d</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Bruno</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Avisar cliente sobre recarga. ~R$9.876 pra 30d.</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-            <div class="meta-row">
-              <span class="meta-name">Hotéis Ponta Verde | Maceió</span>
-              <span class="meta-stat">🟢 6 camp. ativas</span>
-              
-              <span class="meta-sp">R$ 2.990/sem</span>
-            </div>
-            <div class="meta-row">
-              <span class="meta-name">Hotéis Ponta Verde | Francês</span>
-              <span class="meta-stat">🟢 6 camp. ativas</span>
-              
-              <span class="meta-sp">R$ 2.020/sem</span>
-            </div>
-            <div class="meta-row">
-              <span class="meta-name">Hotéis Ponta Verde | Fateixa</span>
-              <span class="meta-stat">🟢 1 camp. ativas</span>
-              
-              <span class="meta-sp">R$ 262/sem</span>
-            </div>
-        <div class="spend-total">Total 7d: R$ 5.272</div>
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 8 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Maia Imóveis [Boleto]</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 3.163</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 329/dia</span><span style="font-size:.7rem;font-weight:700;color:#ca8a04;">9d restantes</span></div></div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 0d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-24</span>
         </div>
         
       </div>
     </div>
-    <div class="card card-green" data-nicho="hotelaria" data-health="green" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">MME Vacation Club</span>
+    <div class="card" style="background:#fefce8;border:1.5px solid #fde68a;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="yellow" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#ca8a04;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Queiroz Azevedo</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-hotelaria">Hotelaria</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#ca8a04;color:white;">P2</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-        <div class="section-label">META ADS</div>
+        <div style="border-left:3px solid #fde047;background:#fef9c3;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚡ Queiroz Azevedo: saldo para ~7d</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Enrique</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Avisar cliente sobre recarga. ~R$2.232 pra 30d.</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-            <div class="meta-row">
-              <span class="meta-name">Ipioca Mar Resort</span>
-              <span class="meta-stat">🟢 3 camp. ativas</span>
-              
-              <span class="meta-sp">R$ 2.093/sem</span>
-            </div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 2 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Queiroz Azevedo</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 523</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 74/dia</span><span style="font-size:.7rem;font-weight:700;color:#ca8a04;">7d restantes</span></div></div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 0d</span>
-          <span class="report-date">2026-06-24</span>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
         </div>
         
       </div>
     </div>
-    <div class="card card-green" data-nicho="hotelaria" data-health="green" data-assessor="bruno">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">Porto Kaetê</span>
+    <div class="card" style="background:#fefce8;border:1.5px solid #fde68a;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="yellow" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#ca8a04;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Ypê</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-hotelaria">Hotelaria</span>
-          <span class="badge-assessor">Bruno</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#ca8a04;color:white;">P2</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-        <div class="section-label">META ADS</div>
+        <div style="border-left:3px solid #fde047;background:#fef9c3;border-radius:0 6px 6px 0;padding:7px 10px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <span style="font-size:.78rem;font-weight:700;color:#1a1a1a;">⚡ Conta Meta não encontrada na API</span>
+            <span style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;background:#ca8a04;color:white;">Bia</span>
+          </div>
+          <div style="font-size:.72rem;color:#374151;margin-top:3px;line-height:1.4;">Verificar se a conta ainda está associada ao token. Checar BM.</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
+        <div style="font-size:.72rem;color:#dc2626;padding:4px 0;">Conta não encontrada na API</div>
         
-            <div class="meta-row">
-              <span class="meta-name">Porto Kaeté</span>
-              <span class="meta-stat">🟢 3 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 5.745</span>
-              <span class="meta-sp">R$ 810/sem</span>
-            </div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
+        </div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-gray">Manual</span>
+      </div>
+    </div>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="hotelaria" data-health="green" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Hotel Ponta Verde</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#fce7f3;color:#9d174d;">Hotelaria</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
+        </div>
+      </div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
+        
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 6 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Hotéis Ponta Verde | Maceió</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#6b7280;">R$ 427/dia</span></div></div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 6 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Hotéis Ponta Verde | Francês</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#6b7280;">R$ 289/dia</span></div></div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 1 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Hotéis Ponta Verde | Fateixa</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#6b7280;">R$ 37/dia</span></div></div>
+        <div style="text-align:right;font-size:.68rem;color:#6b7280;margin-top:4px;">Total 7d: <strong>R$ 5.272</strong></div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="hotelaria" data-health="green" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">MME Vacation Club</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#fce7f3;color:#9d174d;">Hotelaria</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
+        </div>
+      </div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
+        
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 3 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Ipioca Mar Resort</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#6b7280;">R$ 299/dia</span></div></div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 0d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-24</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="hotelaria" data-health="green" data-assessor="bruno">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Porto Kaetê</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#fce7f3;color:#9d174d;">Hotelaria</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Bruno</span>
+        </div>
+      </div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
+        
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 3 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Porto Kaeté</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 5.744</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 116/dia</span><span style="font-size:.7rem;font-weight:700;color:#374151;">49d restantes</span></div></div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3f4f6;color:#6b7280;">Manual</span>
           
         </div>
-        <div class="client-note">Relatório manual</div>
+        <div style="font-size:.68rem;color:#9ca3af;font-style:italic;margin-top:4px;">Relatório manual</div>
       </div>
     </div>
-    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">Adelmo Buffone</span>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="green" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Adelmo Buffone</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Enrique</span>
-        </div>
-      </div>
-      <div class="card-body">
-        
-        <div class="section-label">META ADS</div>
-        
-            <div class="meta-row">
-              <span class="meta-name">Adelmo Buffone</span>
-              <span class="meta-stat">🟢 1 camp. ativas</span>
-              
-              <span class="meta-sp">R$ 51/sem</span>
-            </div>
-        
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
-        </div>
-        
-      </div>
-    </div>
-    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">Andaza Imóveis</span>
-        </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-        <div class="section-label">META ADS</div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-            <div class="meta-row">
-              <span class="meta-name">ANDAZA</span>
-              <span class="meta-stat">🟢 1 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 4.977</span>
-              <span class="meta-sp">R$ 325/sem</span>
-            </div>
-            <div class="meta-row">
-              <span class="meta-name">Marca + Andaza</span>
-              <span class="meta-stat">🟢 1 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 2.343</span>
-              <span class="meta-sp">R$ 485/sem</span>
-            </div>
-        <div class="spend-total">Total 7d: R$ 810</div>
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 1 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Adelmo Buffone</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#6b7280;">R$ 7/dia</span></div></div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
         </div>
         
       </div>
     </div>
-    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">HL Imóveis</span>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="green" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Andaza Imóveis</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-        <div class="section-label">META ADS</div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-            <div class="meta-row">
-              <span class="meta-name">HL IMOVEIS -  LANCAMENTOS</span>
-              <span class="meta-stat">🟢 3 camp. ativas</span>
-              
-              <span class="meta-sp">R$ 918/sem</span>
-            </div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 1 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">ANDAZA</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 4.976</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 46/dia</span><span style="font-size:.7rem;font-weight:700;color:#374151;">107d restantes</span></div></div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 1 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Marca + Andaza</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 2.343</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 69/dia</span><span style="font-size:.7rem;font-weight:700;color:#374151;">33d restantes</span></div></div>
+        <div style="text-align:right;font-size:.68rem;color:#6b7280;margin-top:4px;">Total 7d: <strong>R$ 810</strong></div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
+        </div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-gray">Manual</span>
+      </div>
+    </div>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="green" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">HL Imóveis</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
+        </div>
+      </div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
+        
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 3 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">HL IMOVEIS -  LANCAMENTOS</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#6b7280;">R$ 131/dia</span></div></div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3f4f6;color:#6b7280;">Manual</span>
           
         </div>
-        <div class="client-note">Relatório manual</div>
+        <div style="font-size:.68rem;color:#9ca3af;font-style:italic;margin-top:4px;">Relatório manual</div>
       </div>
     </div>
-    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="bruno">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">Lion Imob</span>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="green" data-assessor="bruno">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Lion Imob</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Bruno</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Bruno</span>
         </div>
       </div>
-      <div class="card-body">
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-        <div class="section-label">META ADS</div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-            <div class="meta-row">
-              <span class="meta-name">CA2 - Lion Negócios Imobiliários</span>
-              <span class="meta-stat">🟢 6 camp. ativas</span>
-              
-              <span class="meta-sp">R$ 1.420/sem</span>
-            </div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 6 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">CA2 - Lion Negócios Imobiliários</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#6b7280;">R$ 203/dia</span></div></div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
         </div>
         
       </div>
     </div>
-    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">Lucas Ferreira</span>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="green" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Lucas Ferreira</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-        <div class="section-label">META ADS</div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-            <div class="meta-row">
-              <span class="meta-name">Lucas Ferreira</span>
-              <span class="meta-stat">🟢 117 camp. ativas</span>
-              
-              <span class="meta-sp">R$ 3.765/sem</span>
-            </div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 117 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Lucas Ferreira</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#6b7280;">R$ 538/dia</span></div></div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-gray">Manual</span>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3f4f6;color:#6b7280;">Manual</span>
           
         </div>
-        <div class="client-note">Relatório manual</div>
+        <div style="font-size:.68rem;color:#9ca3af;font-style:italic;margin-top:4px;">Relatório manual</div>
       </div>
     </div>
-    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="bruno">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">NI Terceiros</span>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="green" data-assessor="bruno">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">NI Terceiros</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Bruno</span>
-        </div>
-      </div>
-      <div class="card-body">
-        
-        <div class="section-label">META ADS</div>
-        
-            <div class="meta-row">
-              <span class="meta-name">NI Negócios de Terceiros</span>
-              <span class="meta-stat">🟢 3 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 2.179</span>
-              <span class="meta-sp">R$ 809/sem</span>
-            </div>
-        
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
-        </div>
-        
-      </div>
-    </div>
-    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">Rafaella Mauricio</span>
-        </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Bruno</span>
         </div>
       </div>
-      <div class="card-body">
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-        <div class="section-label">META ADS</div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-            <div class="meta-row">
-              <span class="meta-name">Rafaella Mauricio</span>
-              <span class="meta-stat">🟢 2 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 2.421</span>
-              <span class="meta-sp">R$ 489/sem</span>
-            </div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 3 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">NI Negócios de Terceiros</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 2.177</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 116/dia</span><span style="font-size:.7rem;font-weight:700;color:#374151;">18d restantes</span></div></div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
         </div>
         
       </div>
     </div>
-    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="enrique">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">Renato Vidal</span>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="green" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Rafaella Mauricio</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Enrique</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-        <div class="section-label">META ADS</div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-            <div class="meta-row">
-              <span class="meta-name">Renato Vidal</span>
-              <span class="meta-stat">🟢 4 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 3.204</span>
-              <span class="meta-sp">R$ 608/sem</span>
-            </div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 2 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Rafaella Mauricio</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 2.421</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 70/dia</span><span style="font-size:.7rem;font-weight:700;color:#374151;">34d restantes</span></div></div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
         </div>
         
       </div>
     </div>
-    <div class="card card-green" data-nicho="imobiliario" data-health="green" data-assessor="bruno">
-      <div class="card-header">
-        <div class="card-title">
-          <span class="dot dot-green" style="background:#16a34a"></span>
-          <span class="client-name">Thiago Lessa</span>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="green" data-assessor="enrique">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Renato Vidal</span>
         </div>
-        <div class="card-badges">
-          <span class="badge-nicho nicho-imobiliario">Imobiliário</span>
-          <span class="badge-assessor">Bruno</span>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Enrique</span>
         </div>
       </div>
-      <div class="card-body">
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
         
-        <div class="section-label">META ADS</div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
         
-            <div class="meta-row">
-              <span class="meta-name">Thiago Lessa</span>
-              <span class="meta-stat">🟢 3 camp. ativas</span>
-              <span class="meta-bal">Saldo R$ 1.855</span>
-              <span class="meta-sp">R$ 599/sem</span>
-            </div>
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 4 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Renato Vidal</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 3.203</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 87/dia</span><span style="font-size:.7rem;font-weight:700;color:#374151;">36d restantes</span></div></div>
         
-        <div class="section-label">RELATÓRIO</div>
-        <div class="report-row">
-          <span class="badge badge-green">✓ há 2d</span>
-          <span class="report-date">2026-06-22</span>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card" style="background:white;border:1.5px solid #bbf7d0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"
+         data-nicho="imobiliário" data-health="green" data-assessor="bruno">
+      <div style="padding:10px 13px 8px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:.88rem;font-weight:800;color:#1a1a1a;">Thiago Lessa</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">OK</span>
+          <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#5b21b6;">Imobiliário</span>
+          <span style="font-size:.62rem;font-weight:700;color:#6b7280;background:#f3f4f6;padding:2px 7px;border-radius:10px;">Bruno</span>
+        </div>
+      </div>
+      <div style="padding:9px 13px 11px;display:flex;flex-direction:column;gap:5px;">
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:2px;">Meta Ads</div>
+        
+            <div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="color:#16a34a;font-weight:700;font-size:.78rem;">●</span><span style="font-size:.78rem;"> Ativa · 3 camp.</span>
+                <span style="font-size:.7rem;color:#6b7280;font-weight:600;">Thiago Lessa</span>
+              </div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:12px;"><span style="font-size:.7rem;color:#374151;">Saldo: <strong>R$ 1.854</strong></span><span style="font-size:.7rem;color:#6b7280;">R$ 86/dia</span><span style="font-size:.7rem;font-weight:700;color:#374151;">21d restantes</span></div></div>
+        
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-top:5px;">Relatório Auto</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">✓ há 2d</span>
+          <span style="font-size:.68rem;color:#9ca3af;">2026-06-22</span>
         </div>
         
       </div>
     </div>
 </div>
 
-<footer class="footer">
-  Trilha Performance Digital · Carteira Beatriz · 24/06/2026 às 19:55 BRT
-</footer>
+<div style="text-align:center;padding:24px;font-size:.7rem;color:#9ca3af;">
+  Trilha Performance Digital · Carteira Beatriz · Atualiza a cada 6h
+</div>
 
 <script>
   const btns = document.querySelectorAll('.filter-btn');
-  const cards = document.querySelectorAll('.card');
+  const cards = document.querySelectorAll('#grid .card');
 
   function applyFilters() {
     const active = [...btns].filter(b => b.classList.contains('active')).map(b => b.dataset.filter);
-    if (active.includes('all')) {
-      cards.forEach(c => c.classList.remove('hidden'));
-      return;
-    }
+    if (active.includes('all')) { cards.forEach(c => c.classList.remove('hidden')); return; }
     cards.forEach(card => {
-      const nicho    = card.dataset.nicho;
-      const health   = card.dataset.health;
-      const assessor = card.dataset.assessor;
       const show = active.every(f => {
-        if (f.startsWith('health:'))   return health   === f.split(':')[1];
-        if (f.startsWith('nicho:'))    return nicho    === f.split(':')[1];
-        if (f.startsWith('assessor:')) return assessor === f.split(':')[1];
+        if (f.startsWith('health:'))   return card.dataset.health   === f.split(':')[1];
+        if (f.startsWith('nicho:'))    return card.dataset.nicho    === f.split(':')[1];
+        if (f.startsWith('assessor:')) return card.dataset.assessor === f.split(':')[1];
         return true;
       });
       card.classList.toggle('hidden', !show);
@@ -1055,16 +1047,12 @@
   btns.forEach(btn => {
     btn.addEventListener('click', () => {
       const f = btn.dataset.filter;
-      if (f === 'all') {
-        btns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      } else {
-        const allBtn = document.querySelector('[data-filter="all"]');
-        allBtn.classList.remove('active');
+      if (f === 'all') { btns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+      else {
+        document.querySelector('[data-filter="all"]').classList.remove('active');
         btn.classList.toggle('active');
-        if (![...btns].some(b => b.classList.contains('active'))) {
-          allBtn.classList.add('active');
-        }
+        if (![...btns].some(b => b.classList.contains('active')))
+          document.querySelector('[data-filter="all"]').classList.add('active');
       }
       applyFilters();
     });
